@@ -15,12 +15,16 @@
   view {
     box-sizing: border-box;
   }
+  text {
+    font-size: 28rpx;
+  }
 </style>
 
 <script type="application/json">
   {
     "pages": [
-      "./pages/index"
+      "./pages/index",
+      "./pages/new"
     ]  }
 </script>
 
