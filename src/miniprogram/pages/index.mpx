@@ -1,0 +1,97 @@
+<template>
+  <view>
+    <view class="top">
+      <view class="title">小题卡</view>
+      <view class="you">
+        <view class="photo"></view>
+        <view class="name">LSJ</view>
+      </view>
+      <view class="button">创建题卡</view>
+      <view class="menu">
+        <view class="menu-item">
+          <text class="value">19</text>
+          <text class="label">我创建的</text>
+        </view>
+        <view class="menu-item">
+          <text class="value">19</text>
+          <text class="label">我回答的</text>
+        </view>
+        <view class="menu-item">
+          <text class="value">19</text>
+          <text class="label">草稿箱</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import { createPage } from '@mpxjs/core'
+  createPage({
+    onLoad () {}
+  })
+</script>
+
+<script type="application/json">
+  {
+    "navigationStyle": "custom",
+    "usingComponents": {
+    }
+  }
+</script>
+<style lang="less" scoped>
+.top {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: #40A9FF;
+  color: white;
+  height: 650rpx;
+  .title {
+    height: 90rpx;
+    line-height: 90rpx;
+    margin-top: 40rpx;
+  }
+  .you {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 30rpx 0;
+    .photo {
+      width: 128rpx;
+      height: 128rpx;
+      border-radius: 50%;
+      background: #ffffff60;
+      margin-bottom: 20rpx;
+    }
+  }
+  .button {
+    background: #ffffff20;
+    height: 50rpx;
+    border-radius: 25rpx;
+    border: 2rpx solid #ffffff;
+    padding: 0 20rpx;
+    line-height: 50rpx;
+    font-size: 24rpx;
+  }
+  .menu {
+    display: flex;
+    margin-top: 40rpx;
+    .menu-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      &:not(:last-child) {
+        margin-right: 150rpx;
+      }
+      .value {
+        font-size: 38rpx;
+      }
+      .label {
+        font-size: 20rpx;
+      }
+    }
+  }
+}
+</style>
