@@ -6,6 +6,9 @@
 
   createApp({
     onLaunch () {
+      wx.cloud.init({
+        env: 'dev-5g1emudhfc5b16b4'
+      })
     }
   })
 </script>
@@ -24,7 +27,8 @@
   {
     "pages": [
       "./pages/index",
-      "./pages/new"
+      "./pages/new",
+      "./pages/login"
     ]  }
 </script>
 

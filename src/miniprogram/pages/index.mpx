@@ -1,10 +1,12 @@
 <template>
-  <view>
+  <view class="main">
     <view class="top">
       <view class="title">小题卡</view>
       <view class="you">
-        <view class="photo"></view>
-        <view class="name">LSJ</view>
+        <view class="photo">
+          <image src="{{ user.avatarUrl }}" mode="aspectFit"></image>
+        </view>
+        <view class="name">{{ user.nickName }}</view>
       </view>
       <view class="button">创建题卡</view>
       <view class="menu">
@@ -27,8 +29,18 @@
 
 <script>
   import { createPage } from '@mpxjs/core'
+  import checkLogin from '../utils/checkLogin'
   createPage({
-    onLoad () {}
+    data: {
+      user: {}
+    },
+    onLoad () {
+      const user = checkLogin()
+      if (user) {
+        this.user = user
+        console.log('user', user)
+      }
+    }
   })
 </script>
 
@@ -40,6 +52,13 @@
   }
 </script>
 <style lang="less" scoped>
+.main {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+}
 .top {
   display: flex;
   flex-direction: column;
@@ -48,6 +67,8 @@
   background: #40A9FF;
   color: white;
   height: 650rpx;
+  background-image: url(../assets/images/background.png);
+  background-size: 100% 100%;
   .title {
     height: 90rpx;
     line-height: 90rpx;
@@ -64,6 +85,12 @@
       border-radius: 50%;
       background: #ffffff60;
       margin-bottom: 20rpx;
+      overflow: hidden;
+      border: 6rpx solid #ffffff40;
+      image {
+        width: 100%;
+        height: 100%;
+      }
     }
   }
   .button {

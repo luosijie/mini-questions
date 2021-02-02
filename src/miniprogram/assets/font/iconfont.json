@@ -1,0 +1,65 @@
+{
+  "id": "2342747",
+  "name": "mini-questions",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "356453",
+      "name": "垃圾",
+      "font_class": "clear",
+      "unicode": "e619",
+      "unicode_decimal": 58905
+    },
+    {
+      "icon_id": "17029965",
+      "name": "新增 (1)",
+      "font_class": "new-card",
+      "unicode": "e69e",
+      "unicode_decimal": 59038
+    },
+    {
+      "icon_id": "581012",
+      "name": "empty-list",
+      "font_class": "empty",
+      "unicode": "e674",
+      "unicode_decimal": 58996
+    },
+    {
+      "icon_id": "737001",
+      "name": "remove-circle",
+      "font_class": "remove",
+      "unicode": "e73e",
+      "unicode_decimal": 59198
+    },
+    {
+      "icon_id": "968656",
+      "name": "选中",
+      "font_class": "check",
+      "unicode": "e64c",
+      "unicode_decimal": 58956
+    },
+    {
+      "icon_id": "1474435",
+      "name": "删除",
+      "font_class": "delete",
+      "unicode": "e638",
+      "unicode_decimal": 58936
+    },
+    {
+      "icon_id": "6756183",
+      "name": "左箭头",
+      "font_class": "pre",
+      "unicode": "e601",
+      "unicode_decimal": 58881
+    },
+    {
+      "icon_id": "6756192",
+      "name": "右箭头",
+      "font_class": "next",
+      "unicode": "e602",
+      "unicode_decimal": 58882
+    }
+  ]
+}
