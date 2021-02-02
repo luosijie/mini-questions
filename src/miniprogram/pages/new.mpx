@@ -38,7 +38,7 @@
     </swiper>
     <view class="controls">
       <view class="ps">
-        <block wx:if="{{ current < formData.cards.length }}">
+        <block wx:if="{{ current < formData.cards.length + 1 && current > 0 }}">
           <view class="tip">
             点击选项右边标记正确答案
           </view>
@@ -120,12 +120,12 @@
       next () {
         if (this.current < this.formData.cards.length + 1) {
           this.current++
+          console.log('cards:', this.formData)
         }
-        console.log('cards:', this.formData.cards)
       },
       // 移除选项
       removeOption (index) {
-        const options = this.formData.cards[this.current].options
+        const options = this.formData.cards[this.current + 1].options
         if (options.length < 3) {
           wx.showToast({
             title: '至少保留2个选项',
@@ -134,11 +134,11 @@
           return
         }
         options.splice(index, 1)
-        console.log('index: ', this.formData.cards[this.current])
+        console.log('index: ', this.formData.cards[this.current + 1])
       },
       // 新增选项
       addOption () {
-        const options = this.formData.cards[this.current].options
+        const options = this.formData.cards[this.current + 1].options
         const option = this.generateOption(new Date().getTime())
         options.push(option)
       },
@@ -157,19 +157,38 @@
           content: '确定删除该题目吗',
           confirmColor: '#40A9FF',
           success: () => {
-            this.formData.cards.splice(this.current, 1)
+            this.formData.cards.splice(this.current + 1, 1)
             console.log('删除卡片', this.formData.cards)
           }
         })
       },
       titleChange (e) {
-        this.formData.cards[this.current].title = e.detail.value
+        this.formData.cards[this.current + 1].title = e.detail.value
         console.log('e', this.formData.cards)
       },
       optionTitleChange (index, e) {
-        const options = this.formData.cards[this.current].options
+        const options = this.formData.cards[this.current + 1].options
         options[index].value = e.detail.value
-        console.log('options-change', e)
+      },
+      // 校验题卡表单
+      validateForm () {
+        if (!this.formData.title) {
+          wx.showToast({
+            title: '题卡名称未填写',
+            icon: 'none'
+          })
+          return false
+        }
+        for (let i = 0; i < this.formData.cards.length; i++) {
+          const card = this.formData.cards[i]
+          if (!card.title) {
+            wx.showToast({
+              title: `第${i + 1}道题 标题未填写`,
+              icon: 'none'
+            })
+            return false
+          }
+        }
       }
     }
   })
