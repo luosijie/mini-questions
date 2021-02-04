@@ -23,6 +23,10 @@
             <i class="remove iconfont icon-remove" bindtap="removeOption(optionIndex)"></i>
             <!-- 选项标题 -->
             <input type="text" value="{{ option.value }}" placeholder="请输入选项标题" bindblur="optionTitleChange(optionIndex, $event)"/>
+            <!-- 正确选项 -->
+            <view class="correct" bindtap="setCorrect(index, optionIndex)">
+              <i class="check iconfont icon-check" wx:if="{{ card.correct === optionIndex }}"></i>
+            </view>
           </view>
           <!-- 新增 -->
           <view class="add-option" wx:if="{{ card.options.length < 4 }}" bindtap="addOption">新增选项</view>
@@ -125,7 +129,7 @@
       },
       // 移除选项
       removeOption (index) {
-        const options = this.formData.cards[this.current + 1].options
+        const options = this.formData.cards[this.current - 1].options
         if (options.length < 3) {
           wx.showToast({
             title: '至少保留2个选项',
@@ -134,11 +138,11 @@
           return
         }
         options.splice(index, 1)
-        console.log('index: ', this.formData.cards[this.current + 1])
+        console.log('index: ', this.formData.cards[this.current - 1])
       },
       // 新增选项
       addOption () {
-        const options = this.formData.cards[this.current + 1].options
+        const options = this.formData.cards[this.current - 1].options
         const option = this.generateOption(new Date().getTime())
         options.push(option)
       },
@@ -157,17 +161,17 @@
           content: '确定删除该题目吗',
           confirmColor: '#40A9FF',
           success: () => {
-            this.formData.cards.splice(this.current + 1, 1)
+            this.formData.cards.splice(this.current - 1, 1)
             console.log('删除卡片', this.formData.cards)
           }
         })
       },
       titleChange (e) {
-        this.formData.cards[this.current + 1].title = e.detail.value
+        this.formData.cards[this.current - 1].title = e.detail.value
         console.log('e', this.formData.cards)
       },
       optionTitleChange (index, e) {
-        const options = this.formData.cards[this.current + 1].options
+        const options = this.formData.cards[this.current - 1].options
         options[index].value = e.detail.value
       },
       // 校验题卡表单
@@ -188,7 +192,25 @@
             })
             return false
           }
+          // 校验选项标题填写情况
+          for (let j = 0; j < card.options.length; j++) {
+            const option = card.options[j]
+            if (!option.value) {
+              wx.showToast({
+                title: `第${i + 1}道题 选项未完善`,
+                icon: 'none'
+              })
+              return false
+            }
+          }
         }
+        return true
+      },
+      // 设置正确选项
+      setCorrect (index, optionIndex) {
+        const card = this.formData.cards[index]
+        card.correct = optionIndex
+        this.$set(this.formData.cards, index, card)
       }
     }
   })
@@ -244,6 +266,8 @@
     .option {
       display: flex;
       align-items: center;
+      position: relative;
+      overflow: hidden;
       input {
         flex-grow: 1;
         border: 2rpx solid #eee;
@@ -252,6 +276,19 @@
         padding-left: 10rpx;
         padding-right: 100rpx;
         margin: 20rpx 0;
+      }
+      .correct {
+        height: 100rpx;
+        width: 100rpx;
+        position: absolute;
+        right: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        .check {
+          color: #40A9FF;
+          font-size: 36rpx;
+        }
       }
     }
     .add-option {
