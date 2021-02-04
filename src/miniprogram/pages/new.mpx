@@ -3,7 +3,7 @@
     <swiper class="cards" bindchange="swiperChange" current="{{ current }}">
       <!-- 全局配置 -->
       <swiper-item>
-        <view class="card config" bindtap="addCard">
+        <view class="card config">
           <input type="text" wx:model="{{ formData.title }}"  placeholder="请输入题卡名称"/>
         </view>
       </swiper-item>
@@ -46,7 +46,7 @@
           <view class="tip">
             点击选项右边标记正确答案
           </view>
-          <i class="delete-card iconfont icon-clear" bindtap="deleteCard"></i>
+          <i class="delete-card iconfont icon-clear" bindtap="deleteCard" wx:if="{{ current > 1 }}"></i>
         </block>
       </view>
       <view class="swip">
@@ -64,7 +64,7 @@
         </view>
         <view class="next iconfont icon-next" bindtap="next"></view>
       </view>
-      <div class="generate">生成</div>
+      <view class="generate" bindtap="generate">生成</view>
     </view>
   </view>
 </template>
@@ -80,6 +80,7 @@
       }
     },
     onLoad () {
+      this.formData.cards = []
       const card = this.generateCard()
       this.formData.cards.push(card)
     },
@@ -211,6 +212,28 @@
         const card = this.formData.cards[index]
         card.correct = optionIndex
         this.$set(this.formData.cards, index, card)
+      },
+      async generate () {
+        const valid = this.validateForm()
+        console.log('表单校验结果', valid)
+        if (!valid) return
+        const res = await wx.cloud.callFunction({
+          name: 'questionAdd',
+          data: this.formData
+        })
+        console.log('新增投票成功', res)
+        if (res.result.success) {
+          wx.showToast({
+            title: '新增投票成功',
+            icon: 'success'
+          })
+          // 跳转到投票详情页
+          // setTimeout(() => {
+          //   wx.redirectTo({
+          //     url: `vote-detail?_id=${res.result._id}&type=${this.formData.type}`
+          //   })
+          // }, 1500)
+        }
       }
     }
   })

@@ -1,0 +1,113 @@
+<template>
+  <view class="main">
+    <view class="empty"wx:if="{{ list && !list.length }}" >
+      暂无数据
+    </view>
+    <view class="list" wx:if="{{ list && list.length }}">
+      <view class="card" wx:for="{{ list }}" wx:key="_id">
+        <view class="title">{{ item.title }}</view>
+        <view class="info">
+          <view class="date">2021-2-1 20:00</view>
+          <view class="nums">3人完成</view>
+        </view>
+      </view>
+      <view class="end" wx:if="{{ total === list.length }}">没有更多数据了</view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import { createPage } from '@mpxjs/core'
+  createPage({
+    data: {
+      total: 0,
+      no: 1,
+      size: 15,
+      list: null
+    },
+    onLoad () {
+      this.getList()
+    },
+    onPullDownRefresh () {
+      console.log('下拉刷新')
+      this.no = 1
+      this.getList()
+    },
+    onReachBottom () {
+      console.log('上拉触底')
+      if (this.total > this.list.length) {
+        this.no++
+        this.getList()
+      }
+    },
+    methods: {
+      async getList () {
+        wx.showLoading({
+          title: '加载中...'
+        })
+        const res = await wx.cloud.callFunction({
+          name: 'questionPage',
+          data: {
+            size: this.size,
+            no: this.no
+          }
+        })
+        wx.hideLoading()
+        this.total = res.result.total
+        if (this.no > 1) {
+          this.list = this.list.concat(res.result.data)
+        } else {
+          this.list = res.result.data
+        }
+        console.log('列表数据:', res)
+        wx.stopPullDownRefresh()
+      }
+    }
+  })
+</script>
+
+<script type="application/json">
+  {
+    "navigationBarTitleText": "我创建的",
+    "navigationBarBackgroundColor": "#40A9FF",
+    "enablePullDownRefresh": true,
+    "usingComponents": {}
+  }
+</script>
+<style lang="less" scoped>
+.main {
+  padding: 20rpx;
+  .list {
+    .card {
+      border: 2rpx solid #eee;
+      border-radius: 8rpx;
+      padding: 20rpx;
+      margin-bottom: 20rpx;
+      .title {
+        font-size: 32rpx;
+        font-weight: bold;
+        margin-bottom: 10rpx;
+      }
+      .info {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        font-size: 24rpx;
+        color: #999;
+      }
+    }
+  }
+  .empty {
+    width: 100vw;
+    height: 100vh;
+    line-height: 100vh;
+    text-align: center;
+    color: #999;
+  }
+  .end {
+    color: #999;
+    font-size: 24rpx;
+    text-align: center;
+  }
+}
+</style>

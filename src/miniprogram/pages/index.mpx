@@ -8,9 +8,9 @@
         </view>
         <view class="name">{{ user.nickName }}</view>
       </view>
-      <view class="button">创建题卡</view>
+      <view class="button" bindtap="toCreate">创建题卡</view>
       <view class="menu">
-        <view class="menu-item">
+        <view class="menu-item" bindtap="toListCreate">
           <text class="value">19</text>
           <text class="label">我创建的</text>
         </view>
@@ -39,6 +39,18 @@
       if (user) {
         this.user = user
         console.log('user', user)
+      }
+    },
+    methods: {
+      toCreate () {
+        wx.navigateTo({
+          url: 'new'
+        })
+      },
+      toListCreate () {
+        wx.navigateTo({
+          url: 'list-create'
+        })
       }
     }
   })

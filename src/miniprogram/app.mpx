@@ -28,7 +28,8 @@
     "pages": [
       "./pages/index",
       "./pages/new",
-      "./pages/login"
+      "./pages/login",
+      "./pages/list-create"
     ]  }
 </script>
 
