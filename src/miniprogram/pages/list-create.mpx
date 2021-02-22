@@ -4,7 +4,7 @@
       暂无数据
     </view>
     <view class="list" wx:if="{{ list && list.length }}">
-      <view class="card" wx:for="{{ list }}" wx:key="_id">
+      <view class="card" wx:for="{{ list }}" wx:key="_id" bindtap="toDetail(item._id)">
         <view class="title">{{ item.title }}</view>
         <view class="info">
           <view class="date">2021-2-1 20:00</view>
@@ -62,6 +62,12 @@
         console.log('列表数据:', res)
         wx.stopPullDownRefresh()
       }
+    },
+    toDetail (_id) {
+      console.log('detial_id', _id)
+      wx.navigateTo({
+        url: `detail-entry?_id=${_id}`
+      })
     }
   })
 </script>

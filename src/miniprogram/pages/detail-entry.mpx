@@ -1,0 +1,144 @@
+<template>
+  <view class="main" wx:if="{{ detail }}">
+    <view class="card">
+      <view class="title">“ {{ detail.title }} ”</view>
+      <view class="from">
+        <image src="{{ detail.creator.avatarUrl }}"></image> {{ detail.creator.nickName }}
+      </view>
+      <view class="info">
+        <view class="date">
+          {{ detail.createTime }}
+        </view>
+        <view class="num">
+          10人参与
+        </view>
+      </view>
+    </view>
+    <view class="action">
+      <view class="share">邀请回答</view>
+      <view class="detail" bindtap="toCards">查看详情</view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import { createPage } from '@mpxjs/core'
+  createPage({
+    data: {
+      detail: null
+    },
+    onLoad (params) {
+      this.getDetail(params._id)
+      // this.getList()
+    },
+    onPullDownRefresh () {
+      console.log('下拉刷新')
+      this.no = 1
+      this.getList()
+    },
+    onReachBottom () {
+      console.log('上拉触底')
+      if (this.total > this.list.length) {
+        this.no++
+        this.getList()
+      }
+    },
+    methods: {
+      async getDetail (_id) {
+        const res = await wx.cloud.callFunction({
+          name: 'questionInfo',
+          data: {
+            _id
+          }
+        })
+        this.detail = res.result.data
+        wx.setNavigationBarTitle({
+          title: this.detail.title
+        })
+      },
+      toCards () {
+        wx.navigateTo({
+          url: `detail-cards?_id=${this.detail._id}`
+        })
+      }
+    }
+  })
+</script>
+
+<script type="application/json">
+  {
+    "navigationBarTitleText": "详情",
+    "navigationBarBackgroundColor": "#40A9FF",
+    "enablePullDownRefresh": true,
+    "usingComponents": {}
+  }
+</script>
+<style lang="less" scoped>
+.main {
+  padding: 20rpx;
+  height: 100vh;
+  .card {
+    border: 2rpx solid #eee;
+    padding: 60rpx;
+    border-radius: 20rpx;
+    height: calc(100% - 200rpx);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    position: relative;
+    .title {
+      font-size: 46rpx;
+      font-weight: bold;
+      color: #666;
+    }
+    .from {
+      color:#999;
+      size: 24rpx;
+      margin-top: 200rpx;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      font-weight: bold;
+      image {
+        width: 50rpx;
+        height: 50rpx;
+        border-radius: 50%;
+        background: #eee;
+        margin-right: 10rpx;
+      }
+    }
+    .info {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      padding: 10rpx 30rpx;
+      color: #999;
+      font-size: 24rpx;
+    }
+  }
+  .action {
+    display: flex;
+    justify-content: space-around;
+    height: 200rpx;
+    align-items: center;
+    .share, .detail {
+      width: 270rpx;
+      height: 86rpx;
+      border-radius: 43rpx;
+      color: white;
+      text-align: center;
+      line-height: 86rpx;
+      size: 35rpx;
+    }
+    .share {
+      background: #FE8515;
+    }
+    .detail {
+      background: #40A9FF;
+    }
+  }
+}
+</style>

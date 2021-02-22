@@ -29,7 +29,9 @@
       "./pages/index",
       "./pages/new",
       "./pages/login",
-      "./pages/list-create"
+      "./pages/list-create",
+      "./pages/detail-entry",
+      "./pages/detail-cards"
     ]  }
 </script>
 

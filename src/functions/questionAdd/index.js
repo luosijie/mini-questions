@@ -19,11 +19,23 @@ const db = cloud.database()
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext()
   const collection = db.collection('questions')
+  
+  // 创建时间
+  const date = new Date()
+  const year  = date.getFullYear()
+  const month = date.getMonth() + 1
+  const day = date.getDate()
+  const hour = date.getHours()
+  const minutes = date.getMinutes()
+  const seconds = date.getSeconds()
+
   const data = {
     creator: wxContext.OPENID, // 出题人
     title: event.title, // 标题
     cards: event.cards, // 选项
+    createTime: `${year}-${month}-${day} ${hour}:${minutes}:${seconds}`
   }
+
   // 集合投票questions：新增记录
   const res = await collection.add({
     data

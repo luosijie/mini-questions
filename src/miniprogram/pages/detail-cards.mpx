@@ -1,0 +1,309 @@
+<template>
+  <view wx:if="{{ detail }}">
+    <swiper class="cards" bindchange="swiperChange" current="{{ current }}">
+      <swiper-item wx:for="{{ detail.cards }}" wx:key="id" wx:for-item="card">
+        <view class="card">
+          <!-- 标题 -->
+          <input type="text" class="title" value="{{ card.title }}" placeholder="请输入标题" bindblur="titleChange"/>
+          <!-- 选项 -->
+          <view
+            class="option"
+            wx:for="{{ card.options }}"
+            wx:key="id"
+            wx:for-item="option"
+            wx:for-index="optionIndex"
+            bindtap="setCorrect(index, optionIndex)"
+          >
+            {{ option.value }}
+            <!-- 正确选项 -->
+            <view class="correct" >
+              <i class="check iconfont icon-check" wx:if="{{ card.correct === optionIndex }}"></i>
+            </view>
+          </view>
+        </view>
+      </swiper-item>
+    </swiper>
+    <view class="controls">
+      <view class="ps">
+          <view class="tip">
+            点击选项选择正确答案
+          </view>
+      </view>
+      <view class="swip">
+        <view class="pre iconfont icon-pre" bindtap="pre"></view>
+        <view class="current" wx:if="{{ detail.cards }}">
+          第{{ current + 1 }}/{{ detail.cards.length }}题
+        </view>
+        <view class="next iconfont icon-next" bindtap="next"></view>
+      </view>
+      <view class="generate" bindtap="generate">提交</view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import { createPage } from '@mpxjs/core'
+  createPage({
+    data: {
+      detail: null,
+      current: 0,
+      formData: {
+        title: '',
+        cards: []
+      }
+    },
+    onLoad (params) {
+      this.getDetail(params._id)
+      this.formData.cards = []
+      const card = this.generateCard()
+      this.formData.cards.push(card)
+    },
+    methods: {
+      async getDetail (_id) {
+        const res = await wx.cloud.callFunction({
+          name: 'questionDetail',
+          data: {
+            _id
+          }
+        })
+        this.detail = res.result.data
+        console.log("detail:", this.detail)
+        wx.setNavigationBarTitle({
+          title: this.detail.title
+        })
+      },
+      // 生成选项
+      generateOption (id) {
+        return {
+          id,
+          value: ''
+        }
+      },
+      // 生成题目
+      generateCard () {
+        const id = new Date().getTime()
+        const card = {
+          id,
+          title: '',
+          options: [
+            this.generateOption(id + 1),
+            this.generateOption(id + 2),
+            this.generateOption(id + 3),
+            this.generateOption(id + 4)
+          ],
+          correct: 0
+        }
+        return card
+      },
+      swiperChange (e) {
+        this.current = e.detail.current
+      },
+      // 切换上一题
+      pre () {
+        if (this.current > 0) {
+          this.current--
+        } else {
+          wx.showToast({
+            title: '已经是第一题了',
+            icon: 'none'
+          })
+        }
+      },
+      // 切换下一题目
+      next () {
+        if (this.current < this.detail.cards.length - 1) {
+          this.current++
+        } else {
+          wx.showToast({
+            title: '已经是最后一题了',
+            icon: 'none'
+          })
+        }
+      },
+      titleChange (e) {
+        this.formData.cards[this.current - 1].title = e.detail.value
+        console.log('e', this.formData.cards)
+      },
+      optionTitleChange (index, e) {
+        const options = this.formData.cards[this.current - 1].options
+        options[index].value = e.detail.value
+      },
+      // 校验题卡表单
+      validateForm () {
+        for (let i = 0; i < this.detail.cards.length; i++) {
+          const card = this.detail.cards[i]
+          if (card.correct === undefined) {
+            wx.showToast({
+              title: `第 ${i + 1} 道题还没答呢`,
+              icon: 'none'
+            })
+            return false
+          }
+        }
+        return true
+      },
+      // 设置正确选项
+      setCorrect (index, optionIndex) {
+        const card = this.detail.cards[index]
+        card.correct = optionIndex
+        this.$set(this.detail.cards, index, card)
+      },
+      async generate () {
+        const valid = this.validateForm()
+        console.log('表单校验结果', valid)
+        if (!valid) return
+        const answer = this.detail.cards.map(e => {
+          return e.correct
+        })
+        console.log('answer', answer)
+      }
+    }
+  })
+</script>
+
+<script type="application/json">
+  {
+    "navigationBarTitleText": "创建题卡",
+    "navigationBarBackgroundColor": "#40A9FF",
+    "usingComponents": {
+    }
+  }
+</script>
+<style lang="less" scoped>
+@import url('../assets/font/iconfont.css');
+.cards {
+  // background: red;
+  height: 70vh;
+  position: relative;
+  swiper-item {
+    padding: 40rpx 20rpx;
+    box-sizing: border-box;
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    border: 2rpx solid #eee;
+    border-radius: 16rpx;
+    padding: 20rpx;
+    width: 100%;
+    height: 100%;
+    font-weight: bold;
+
+    &.config {
+      justify-content: center;
+      align-items: center;
+      font-size: 38rpx;
+      input {
+        text-align: center;
+      }
+    }
+    .title {
+      margin: 40rpx 0;
+    }
+    
+    i.remove {
+      color: #EF590F;
+      font-size: 40rpx;
+      margin-right: 10rpx;
+    }
+    .option {
+      display: flex;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      height: 100rpx;
+      line-height: 100rpx;
+      border: 2rpx solid #eee;
+      border-radius: 8rpx;
+      padding-left: 20rpx;
+      padding-right: 100rpx;
+      margin: 20rpx 0;
+      .correct {
+        height: 100rpx;
+        width: 100rpx;
+        position: absolute;
+        right: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        .check {
+          color: #40A9FF;
+          font-size: 36rpx;
+        }
+      }
+    }
+    .add-option {
+      font-size: 24rpx;
+      font-weight: normal;
+      color: #999;
+      text-align: center;
+    }
+    .new-card {
+      color: #ccc;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      i {
+        font-size: 100rpx;
+      }
+    }
+  }
+}
+.controls {
+  display: flex;
+  // justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 30vh;
+  flex-direction: column;
+  position: relative;
+  .ps {
+    height: 90rpx;
+    text-align: center;
+    .tip {
+      color: #CCCCCC;
+      font-size: 24rpx;
+      margin-top: 0;
+      margin-bottom: 10rpx;
+    }
+    .delete-card {
+      color: #999;
+    }
+  }
+  .swip {
+    padding: 40rpx 20rpx;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    .pre, .next {
+      border-radius: 50%;
+      color: #eee;
+      width: 100rpx;
+      height: 100rpx;
+      font-size: 100rpx;
+    }
+    .current {
+      color: #999;
+      font-size: 32rpx;
+      font-weight: bold;
+    }
+  }
+  .generate {
+    height: 86rpx;
+    width: 270rpx;
+    border-radius: 43rpx;
+    background: #40A9FF;
+    font-size: 35rpx;
+    font-weight: bold;
+    text-align: center;
+    line-height: 86rpx;
+    color: white;
+    margin-bottom: 20rpx;
+  }
+}
+</style>
