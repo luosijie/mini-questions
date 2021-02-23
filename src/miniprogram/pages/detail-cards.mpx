@@ -36,7 +36,7 @@
         </view>
         <view class="next iconfont icon-next" bindtap="next"></view>
       </view>
-      <view class="generate" bindtap="generate">提交</view>
+      <view class="generate" bindtap="generate" wx:if="{{ isOwner === false }}">提交</view>
     </view>
   </view>
 </template>
@@ -50,13 +50,12 @@
       formData: {
         title: '',
         cards: []
-      }
+      },
+      isOwner: null
     },
     onLoad (params) {
+      this.user = wx.getStorageSync('user')
       this.getDetail(params._id)
-      this.formData.cards = []
-      const card = this.generateCard()
-      this.formData.cards.push(card)
     },
     methods: {
       async getDetail (_id) {
@@ -67,7 +66,8 @@
           }
         })
         this.detail = res.result.data
-        console.log("detail:", this.detail)
+        this.isOwner = this.detail.creator.OPENID === this.user.OPENID
+        console.log('detail:', this.detail)
         wx.setNavigationBarTitle({
           title: this.detail.title
         })
@@ -78,22 +78,6 @@
           id,
           value: ''
         }
-      },
-      // 生成题目
-      generateCard () {
-        const id = new Date().getTime()
-        const card = {
-          id,
-          title: '',
-          options: [
-            this.generateOption(id + 1),
-            this.generateOption(id + 2),
-            this.generateOption(id + 3),
-            this.generateOption(id + 4)
-          ],
-          correct: 0
-        }
-        return card
       },
       swiperChange (e) {
         this.current = e.detail.current
@@ -144,6 +128,7 @@
       },
       // 设置正确选项
       setCorrect (index, optionIndex) {
+        if (this.isOwner === true) return
         const card = this.detail.cards[index]
         card.correct = optionIndex
         this.$set(this.detail.cards, index, card)
@@ -155,7 +140,24 @@
         const answer = this.detail.cards.map(e => {
           return e.correct
         })
-        console.log('answer', answer)
+        const data = {
+          questionId: this.detail._id,
+          answer
+        }
+        wx.showLoading({
+          title: '提交中'
+        })
+        const res = await wx.cloud.callFunction({
+          name: 'answerAdd',
+          data
+        })
+        wx.hideLoading()
+        console.log('答题提交返回：', res)
+        if (res.result.success) {
+          wx.redirectTo({
+            url: `result?_id=${res.result.data}`
+          })
+        }
       }
     }
   })

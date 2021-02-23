@@ -7,8 +7,8 @@
       <view class="card" wx:for="{{ list }}" wx:key="_id" bindtap="toDetail(item._id)">
         <view class="title">{{ item.title }}</view>
         <view class="info">
-          <view class="date">2021-2-1 20:00</view>
-          <view class="nums">3人完成</view>
+          <view class="date">{{ item.createTime }}</view>
+          <view class="nums">{{ item.answers ? item.answers.length : 0 }}人完成</view>
         </view>
       </view>
       <view class="end" wx:if="{{ total === list.length }}">没有更多数据了</view>
@@ -23,9 +23,14 @@
       total: 0,
       no: 1,
       size: 15,
-      list: null
+      list: null,
+      type: ''
     },
-    onLoad () {
+    onLoad (params) {
+      this.type = params.type
+      wx.setNavigationBarTitle({
+        title: this.type === 'create' ? '我创建的' : '我回答的'
+      })
       this.getList()
     },
     onPullDownRefresh () {
@@ -48,6 +53,7 @@
         const res = await wx.cloud.callFunction({
           name: 'questionPage',
           data: {
+            type: this.type,
             size: this.size,
             no: this.no
           }

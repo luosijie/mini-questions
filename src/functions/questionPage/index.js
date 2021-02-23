@@ -12,16 +12,24 @@ const db = cloud.database()
 
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext()
+  const type = event.type
   const size = event.size
   //获取接口参数
   const no = event.no
   const OPENID = wxContext.OPENID
   const collection = db.collection('questions')
+  const match = {}
+  if (type === 'create') {
+    match.creator = OPENID
+  }
+  if (type === 'answer') {
+    match.answers = db.command.elemMatch({
+      creator: OPENID
+    })
+  }
   // 查找集合中的投票数据
   const votes = await collection.aggregate()
-  .match({
-    creator: OPENID
-  })
+  .match(match)
   .lookup({
     from: 'options',
     localField: '_id',

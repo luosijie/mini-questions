@@ -1,23 +1,27 @@
 <template>
   <view class="main" wx:if="{{ detail }}">
     <view class="card">
-      <view class="title">“ {{ detail.title }} ”</view>
+      <view class="title">“ {{ detail.question.title }} ”</view>
+      <view class="score">{{ detail.score }}</view>
       <view class="from">
-        <image src="{{ detail.creator.avatarUrl }}"></image> {{ detail.creator.nickName }}
+        <image src="{{ detail.creator.avatarUrl }}"></image> {{ detail.creator.nickName }} 的成绩单
       </view>
       <view class="info">
         <view class="date">
           {{ detail.createTime }}
         </view>
-        <view class="num">
-          10人参与
+        <view class="date">
+          出题人: {{ detail.questionCreator.nickName }}
+        </view>
+        <view class="num" wx:if="{{ detail.question.answers }}">
+          {{ detail.question.answers.length }}人参与
         </view>
       </view>
     </view>
     <view class="action">
-      <button class="share" open-type="share">邀请回答</button>
-      <view class="detail" bindtap="toCards" wx:if="{{ isOwner === true }}">查看详情</view>
-      <view class="detail" bindtap="toCards" wx:else>开始答题</view>
+      <button class="share" open-type="share">分享</button>
+      <view class="detail" bindtap="toCards" wx:if="{{ user.OPENID === detail.creator.OPENID }}">再试一次</view>
+      <view class="detail" bindtap="toDetail" wx:else>我试一下</view>
     </view>
   </view>
 </template>
@@ -26,55 +30,44 @@
   import { createPage } from '@mpxjs/core'
   createPage({
     data: {
-      detail: null,
       user: null,
-      isOwner: null
+      detail: null
     },
     onLoad (params) {
       this.user = wx.getStorageSync('user')
       this.getDetail(params._id)
     },
-    onPullDownRefresh () {
-      console.log('下拉刷新')
-      this.no = 1
-      this.getList()
-    },
-    onReachBottom () {
-      console.log('上拉触底')
-      if (this.total > this.list.length) {
-        this.no++
-        this.getList()
-      }
-    },
     onShareAppMessage () {
-      let title
-      if (this.isOwner === true) {
-        title = `快来我创建的题卡：${this.detail.title}, 看看你可以得多少分`
-      } else {
-        title = `快来${this.detail.creator.nickName}创建的题卡：${this.detail.title}, 看看你可以得多少分`
-      }
+      const title = `我在${this.detail.questionCreator.nickName}的题目中得分${this.detail.score},你也来试试？`
       return {
         title
+      }
+    },
+    computed: {
+      isOwner () {
+        console.log('this.user', this.user)
+        return this.user
       }
     },
     methods: {
       async getDetail (_id) {
         const res = await wx.cloud.callFunction({
-          name: 'questionInfo',
+          name: 'answerDetail',
           data: {
             _id
           }
         })
-        console.log('detail:', this.detail)
+        console.log('answerDetial:', res)
         this.detail = res.result.data
-        this.isOwner = this.detail.creator.OPENID === this.user.OPENID
-        wx.setNavigationBarTitle({
-          title: this.detail.title
-        })
       },
       toCards () {
         wx.navigateTo({
-          url: `detail-cards?_id=${this.detail._id}`
+          url: `detail-cards?_id=${this.detail.question._id}`
+        })
+      },
+      toDetail () {
+        wx.navigateTo({
+          url: `detail-entry?_id=${this.detail.question._id}`
         })
       }
     }
@@ -83,7 +76,7 @@
 
 <script type="application/json">
   {
-    "navigationBarTitleText": "详情",
+    "navigationBarTitleText": "成绩单",
     "navigationBarBackgroundColor": "#40A9FF",
     "enablePullDownRefresh": true,
     "usingComponents": {}
@@ -108,17 +101,23 @@
       font-weight: bold;
       color: #666;
     }
+    .score {
+      font-size: 160rpx;
+      font-weight: bold;
+      color: #40A9FF;
+      margin-top: 10rpx;
+    }
     .from {
       color:#999;
       size: 24rpx;
-      margin-top: 200rpx;
+      margin-top: 150rpx;
       display: flex;
       align-items: center;
       overflow: hidden;
       font-weight: bold;
       image {
-        width: 50rpx;
-        height: 50rpx;
+        width: 40rpx;
+        height: 40rpx;
         border-radius: 50%;
         background: #eee;
         margin-right: 10rpx;

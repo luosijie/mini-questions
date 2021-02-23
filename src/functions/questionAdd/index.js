@@ -30,10 +30,11 @@ exports.main = async (event, context) => {
   const seconds = date.getSeconds()
 
   const data = {
+    createTime: `${year}-${month}-${day} ${hour}:${minutes}:${seconds}`,
     creator: wxContext.OPENID, // 出题人
     title: event.title, // 标题
     cards: event.cards, // 选项
-    createTime: `${year}-${month}-${day} ${hour}:${minutes}:${seconds}`
+    answers: [] // 回答的记录
   }
 
   // 集合投票questions：新增记录

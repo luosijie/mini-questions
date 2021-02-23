@@ -10,17 +10,17 @@
       </view>
       <view class="button" bindtap="toCreate">创建题卡</view>
       <view class="menu">
-        <view class="menu-item" bindtap="toListCreate">
-          <text class="value">19</text>
+        <view class="menu-item" bindtap="toList('create')">
+          <text class="value">i</text>
           <text class="label">我创建的</text>
         </view>
-        <view class="menu-item">
-          <text class="value">19</text>
+        <view class="menu-item" bindtap="toList('answer')">
+          <text class="value">i</text>
           <text class="label">我回答的</text>
         </view>
-        <view class="menu-item">
-          <text class="value">19</text>
-          <text class="label">草稿箱</text>
+        <view class="menu-item" bindtap="toList('skecth')">
+          <text class="value">i</text>
+          <text class="label">草稿箱(10)</text>
         </view>
       </view>
     </view>
@@ -47,9 +47,9 @@
           url: 'new'
         })
       },
-      toListCreate () {
+      toList (type) {
         wx.navigateTo({
-          url: 'list-create'
+          url: `list-question?type=${type}`
         })
       }
     }
