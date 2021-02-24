@@ -6,6 +6,27 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "4475055",
+      "name": "问",
+      "font_class": "q",
+      "unicode": "e626",
+      "unicode_decimal": 58918
+    },
+    {
+      "icon_id": "4880356",
+      "name": "草稿",
+      "font_class": "sketch",
+      "unicode": "e691",
+      "unicode_decimal": 59025
+    },
+    {
+      "icon_id": "17934772",
+      "name": "灯",
+      "font_class": "a",
+      "unicode": "e70c",
+      "unicode_decimal": 59148
+    },
+    {
       "icon_id": "356453",
       "name": "垃圾",
       "font_class": "clear",

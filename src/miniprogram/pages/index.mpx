@@ -11,37 +11,82 @@
       <view class="button" bindtap="toCreate">创建题卡</view>
       <view class="menu">
         <view class="menu-item" bindtap="toList('create')">
-          <text class="value">i</text>
+          <i class="value iconfont icon-q"></i>
           <text class="label">我创建的</text>
         </view>
         <view class="menu-item" bindtap="toList('answer')">
-          <text class="value">i</text>
+          <i class="value iconfont icon-a"></i>
           <text class="label">我回答的</text>
         </view>
-        <view class="menu-item" bindtap="toList('skecth')">
-          <text class="value">i</text>
-          <text class="label">草稿箱(10)</text>
+        <view class="menu-item" bindtap="toSketch">
+          <i class="value iconfont icon-sketch"></i>
+          <text class="label">草稿箱</text>
         </view>
       </view>
     </view>
+    <scroll-view scroll-y="true" class="records" bindscrolltolower="getRecords('push')">
+      <view class="empty" wx:if="{{ records && !records.length }}"> 暂无数据 </view>
+      <block wx:else>
+        <view class="record" wx:for="{{ records }}" wx:key="_id" bindtap="toDetail(index)">
+          <image src="{{ item.creator.avatarUrl }}"></image>
+          <view class="content">
+            <view class="info" wx:style="{{ { color: item.readed ? '#999' : '#333' } }}">
+              <view class="title">{{ item.creator.nickName }} 完成了你的题卡“{{ item.question.title }}”</view>
+              <view class="score">正确率：{{ item.score }}</view>
+            </view>
+            <view class="state">
+              <view class="if-read">{{ item.readed ? '已读' : '未读' }}</view>
+              <view class="date">{{ item.createTime }}</view>
+            </view>
+          </view>
+        </view>
+      </block>
+    </scroll-view>
   </view>
 </template>
 
 <script>
   import { createPage } from '@mpxjs/core'
-  import checkLogin from '../utils/checkLogin'
   createPage({
     data: {
-      user: {}
+      records: null,
+      user: {},
+      size: 10,
+      no: 1,
+      total: 0
     },
     onLoad () {
-      const user = checkLogin()
-      if (user) {
-        this.user = user
-        console.log('user', user)
-      }
+      this.user = wx.getStorageSync('user')
+      this.getRecords()
     },
     methods: {
+      async getRecords (type) {
+        if (this.records && this.records.length >= this.total) return
+        if (type === 'push') {
+          this.no++
+        } else {
+          this.no = 1
+        }
+        wx.showLoading({
+          title: '加载中...'
+        })
+        const res = await wx.cloud.callFunction({
+          name: 'answerPage',
+          data: {
+            size: this.size,
+            no: this.no
+          }
+        })
+        wx.hideLoading()
+        this.total = res.result.total
+        if (this.no > 1) {
+          this.records = this.records.concat(res.result.data)
+        } else {
+          this.records = res.result.data
+        }
+        console.log('answer:', this.records)
+        wx.stopPullDownRefresh()
+      },
       toCreate () {
         wx.navigateTo({
           url: 'new'
@@ -50,6 +95,32 @@
       toList (type) {
         wx.navigateTo({
           url: `list-question?type=${type}`
+        })
+      },
+      toSketch () {
+        wx.showToast({
+          title: '功能未开发',
+          icon: 'none'
+        })
+      },
+      async toDetail (index) {
+        const record = this.records[index]
+        console.log('detail:', record)
+        if (!record.readed) {
+          const res = await wx.cloud.callFunction({
+            name: 'answerRead',
+            data: {
+              _id: record._id
+            }
+          })
+          if (res.result.success) {
+            record.readed = true
+            this.$set(this.records, index, record)
+          }
+          // console.log('rs', res)
+        }
+        wx.navigateTo({
+          url: `result?_id=${record._id}`
         })
       }
     }
@@ -64,6 +135,7 @@
   }
 </script>
 <style lang="less" scoped>
+@import url('../assets/font/iconfont.css');
 .main {
   position: fixed;
   top: 0;
@@ -126,9 +198,59 @@
       }
       .value {
         font-size: 38rpx;
+        margin-bottom: 10rpx;
       }
       .label {
         font-size: 20rpx;
+      }
+    }
+  }
+}
+.records {
+  width: 100vw;
+  height: calc(100% - 650rpx);
+  position: relative;
+  overflow: hidden;
+  padding: 30rpx 20rpx;
+  box-sizing: border-box;
+  .empty {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #999;
+    size: 24rpx;
+  }
+  .record {
+    display: flex;
+    margin-bottom: 30rpx;
+    image {
+      width: 60rpx;
+      height: 60rpx;
+      border-radius: 50%;
+      background: #eee;
+      margin-top: 10rpx;
+    }
+    .content {
+      padding-left: 10rpx;
+      font-size: 24rpx;
+      width: calc(100% - 60rpx);
+      .info, .state {
+        display: flex;
+        justify-content: space-between;
+      }
+      .info {
+        height: 80rpx;
+        border: 1rpx solid #eee;
+        border-radius: 8rpx;
+        padding: 10rpx;
+        align-items: center;
+      }
+      .state {
+        font-size: 20rpx;
+        color: #999;
+        margin-top: 5rpx;
       }
     }
   }
