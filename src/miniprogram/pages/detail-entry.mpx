@@ -10,14 +10,14 @@
           {{ detail.createTime }}
         </view>
         <view class="num">
-          10人参与
+          {{ detail.answers.length }}人参与
         </view>
       </view>
     </view>
     <view class="action">
       <button class="share" open-type="share">邀请回答</button>
-      <view class="detail" bindtap="toCards" wx:if="{{ isOwner === true }}">查看详情</view>
-      <view class="detail" bindtap="toCards" wx:else>开始答题</view>
+      <!-- <view class="detail" bindtap="toCards" wx:if="{{ isOwner === true }}">查看详情</view> -->
+      <view class="detail" bindtap="toCards">开始答题</view>
     </view>
   </view>
 </template>
@@ -31,6 +31,7 @@
       isOwner: null
     },
     onLoad (params) {
+      console.log('sss')
       this.user = wx.getStorageSync('user')
       this.getDetail(params._id)
     },
@@ -59,18 +60,23 @@
     },
     methods: {
       async getDetail (_id) {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
         const res = await wx.cloud.callFunction({
           name: 'questionInfo',
           data: {
             _id
           }
         })
-        console.log('detail:', this.detail)
         this.detail = res.result.data
+        console.log('detail:', this.detail)
         this.isOwner = this.detail.creator.OPENID === this.user.OPENID
         wx.setNavigationBarTitle({
           title: this.detail.title
         })
+        wx.hideLoading()
       },
       toCards () {
         wx.navigateTo({
@@ -111,7 +117,7 @@
     .from {
       color:#999;
       size: 24rpx;
-      margin-top: 200rpx;
+      margin: 200rpx 0;
       display: flex;
       align-items: center;
       overflow: hidden;
@@ -151,6 +157,7 @@
     }
     .share {
       background: #FE8515;
+      margin: 0;
     }
     .detail {
       background: #40A9FF;

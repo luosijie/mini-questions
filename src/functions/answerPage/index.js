@@ -20,7 +20,7 @@ exports.main = async (event, context) => {
   // 查找集合中的投票数据
   const votes = await collection.aggregate()
   .match({
-    creator: OPENID
+    questionCreator: OPENID
   })
   .lookup({
     from: 'users',

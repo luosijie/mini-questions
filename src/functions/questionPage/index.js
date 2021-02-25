@@ -1,8 +1,8 @@
 /**
- * 获取我的投票记录分页
+ * 获取我的问题记录分页
  * @param {Number} no 页码
  * @param {Number} size 页数
- * @return {Object} 投票数据列表和总数
+ * @return {Object} 问题数据列表和总数
  */
 const cloud = require('wx-server-sdk')
 cloud.init({
@@ -27,8 +27,8 @@ exports.main = async (event, context) => {
       creator: OPENID
     })
   }
-  // 查找集合中的投票数据
-  const votes = await collection.aggregate()
+  // 查找集合中的问题数据
+  const questionQuery = await collection.aggregate()
   .match(match)
   .lookup({
     from: 'options',
@@ -46,6 +46,6 @@ exports.main = async (event, context) => {
   const count = await collection.count()
   return {
     total: count.total,
-    data: votes.list
+    data: questionQuery.list
   }
 }

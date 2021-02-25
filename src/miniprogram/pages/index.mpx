@@ -2,7 +2,7 @@
   <view class="main">
     <view class="top">
       <view class="title">小题卡</view>
-      <view class="you">
+      <view class="you" wx:if="{{ user }}">
         <view class="photo">
           <image src="{{ user.avatarUrl }}" mode="aspectFit"></image>
         </view>
@@ -24,7 +24,14 @@
         </view>
       </view>
     </view>
-    <scroll-view scroll-y="true" class="records" bindscrolltolower="getRecords('push')">
+    <scroll-view
+      scroll-y="true"
+      class="records"
+      bindscrolltolower="getRecords('push')"
+      refresher-enabled="true"
+      bindrefresherrefresh="refresh"
+      refresher-triggered="{{ refreshing }}"
+    >
       <view class="empty" wx:if="{{ records && !records.length }}"> 暂无数据 </view>
       <block wx:else>
         <view class="record" wx:for="{{ records }}" wx:key="_id" bindtap="toDetail(index)">
@@ -50,18 +57,33 @@
   createPage({
     data: {
       records: null,
-      user: {},
+      user: null,
       size: 10,
       no: 1,
-      total: 0
+      total: 0,
+      refreshing: false
     },
     onLoad () {
-      this.user = wx.getStorageSync('user')
       this.getRecords()
     },
+    onShow () {
+      this.user = wx.getStorageSync('user')
+    },
     methods: {
+      refresh () {
+        this.refreshing = true
+        console.log('下拉触发', this.refreshing)
+        this.getRecords('refresh')
+      },
       async getRecords (type) {
-        if (this.records && this.records.length >= this.total) return
+        if (this.records && this.records.length >= this.total) {
+          if (type === 'refresh') {
+            setTimeout(() => {
+              this.refreshing = false
+            }, 100)
+          }
+          return
+        }
         if (type === 'push') {
           this.no++
         } else {
@@ -77,6 +99,7 @@
             no: this.no
           }
         })
+        if (type === 'refresh') this.refreshing = false
         wx.hideLoading()
         this.total = res.result.total
         if (this.no > 1) {
@@ -144,6 +167,7 @@
   height: 100vh;
 }
 .top {
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -210,9 +234,9 @@
   width: 100vw;
   height: calc(100% - 650rpx);
   position: relative;
-  overflow: hidden;
   padding: 30rpx 20rpx;
   box-sizing: border-box;
+
   .empty {
     width: 100%;
     height: 100%;

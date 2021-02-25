@@ -1,8 +1,9 @@
 <template>
   <view class="main">
     <view class="logo">
-      <i class="iconfont icon-zan"></i>
+      <image src="../assets/images/logo.png"></image>
     </view>
+    <view class="name">小题卡</view>
     <button
       class="submit"
       open-type="getUserInfo"
@@ -18,7 +19,7 @@
   createPage({
     data: {},
     methods: {
-      getUserInfo: async e => {
+      async getUserInfo (e) {
         try {
           const res = await wx.cloud.callFunction({
             name: 'login',
@@ -60,18 +61,25 @@
   align-items: center;
 
   .logo{
-    width: 200rpx;
-    height: 200rpx;
+    width: 300rpx;
+    height: 300rpx;
     background: white;
-    border: 20rpx solid #f2f2f2;
+    border: 3rpx solid #f2f2f2;
+    padding: 30rpx;
+    overflow: hidden;
     border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
-    i {
-      color: #40a9ff;
-      font-size: 60rpx;
+    image {
+      width: 100%;
+      height: 100%;
     }
+  }
+  .name {
+    margin-top: 60rpx;
+    color: #333;
+    font-weight: bold;
   }
   .submit {
     width: 300rpx;
@@ -83,7 +91,7 @@
     font-weight: bold;
     text-align: center;
     line-height: 80rpx;
-    margin: 200rpx 0;
+    margin: 300rpx 0 100rpx;
   }
 }
 </style>

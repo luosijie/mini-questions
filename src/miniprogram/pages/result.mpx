@@ -6,6 +6,15 @@
       <view class="from">
         <image src="{{ detail.creator.avatarUrl }}"></image> {{ detail.creator.nickName }} 的成绩单
       </view>
+      <view class="result">
+        <view
+          class="item"
+          wx:for="{{ detail.result }}"
+          wx:style="{{ { background: item.right ? '#4faf70' : '#d94948' } }}"
+        >
+          {{ item.letter }}
+        </view>
+      </view>
       <view class="info">
         <view class="date">
           {{ detail.createTime }}
@@ -28,6 +37,7 @@
 
 <script>
   import { createPage } from '@mpxjs/core'
+  import no2letter from '../utils/no2letter'
   createPage({
     data: {
       user: null,
@@ -51,6 +61,9 @@
     },
     methods: {
       async getDetail (_id) {
+        wx.showLoading({
+          title: '加载中...'
+        })
         const res = await wx.cloud.callFunction({
           name: 'answerDetail',
           data: {
@@ -59,6 +72,13 @@
         })
         console.log('answerDetial:', res)
         this.detail = res.result.data
+        this.detail.result = this.detail.result.map((e, index) => {
+          return {
+            letter: no2letter(this.detail.answer[index]),
+            right: e
+          }
+        })
+        wx.hideLoading()
       },
       toCards () {
         wx.navigateTo({
@@ -123,6 +143,24 @@
         margin-right: 10rpx;
       }
     }
+    .result {
+      display: flex;
+      margin-top: 60rpx;
+      margin-bottom: 100rpx;
+      .item {
+        width: 40rpx;
+        height: 40rpx;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        size: 20rpx;
+        &:not(:last-child) {
+          margin-right: 10rpx;
+        }
+      }
+    }
     .info {
       position: absolute;
       bottom: 0;
@@ -150,6 +188,7 @@
     }
     .share {
       background: #FE8515;
+      margin: 0;
     }
     .detail {
       background: #40A9FF;

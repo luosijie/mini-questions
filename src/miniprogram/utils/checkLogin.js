@@ -4,7 +4,7 @@ export default function () {
   console.log('current-user', user)
   if (!user) {
     wx.navigateTo({
-      url: 'login'
+      url: 'pages/login'
     })
     return null
   }

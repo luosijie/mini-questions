@@ -139,7 +139,6 @@
           return
         }
         options.splice(index, 1)
-        console.log('index: ', this.formData.cards[this.current - 1])
       },
       // 新增选项
       addOption () {
@@ -215,24 +214,27 @@
       },
       async generate () {
         const valid = this.validateForm()
-        console.log('表单校验结果', valid)
         if (!valid) return
+        wx.showLoading({
+          title: '处理中...',
+          mask: true
+        })
         const res = await wx.cloud.callFunction({
           name: 'questionAdd',
           data: this.formData
         })
-        console.log('新增投票成功', res)
+        console.log('新增题目成功', res)
         if (res.result.success) {
           wx.showToast({
-            title: '新增投票成功',
+            title: '创建成功',
             icon: 'success'
           })
           // 跳转到投票详情页
-          // setTimeout(() => {
-          //   wx.redirectTo({
-          //     url: `vote-detail?_id=${res.result._id}&type=${this.formData.type}`
-          //   })
-          // }, 1500)
+          setTimeout(() => {
+            wx.redirectTo({
+              url: `detail-entry?_id=${res.result._id}`
+            })
+          }, 1500)
         }
       }
     }

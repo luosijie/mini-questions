@@ -32,8 +32,14 @@ exports.main = async (event, context) => {
   
   // 计算正确的个数
   let right = 0
+  const result = []
   for (let i = 0; i < cards.length; i++) {
-    if (cards[i].correct === answer[i]) right++
+    if (cards[i].correct === answer[i]) {
+      right++
+      result[i] = true
+    } else {
+      result[i] = false
+    }
   }
 
   const score =  `${(right / cards.length * 100).toFixed(1)}%`
@@ -53,7 +59,8 @@ exports.main = async (event, context) => {
     questionId,
     questionCreator,
     answer,
-    score
+    score,
+    result
   }
 
   // 集合投票questions：新增记录
