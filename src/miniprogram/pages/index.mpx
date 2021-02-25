@@ -76,22 +76,19 @@
         this.getRecords('refresh')
       },
       async getRecords (type) {
-        if (this.records && this.records.length >= this.total) {
-          if (type === 'refresh') {
-            setTimeout(() => {
-              this.refreshing = false
-            }, 100)
-          }
-          return
-        }
         if (type === 'push') {
+          if (this.records && this.records.length >= this.total) {
+            return
+          }
           this.no++
         } else {
           this.no = 1
         }
-        wx.showLoading({
-          title: '加载中...'
-        })
+        if (type !== 'refresh') {
+          wx.showLoading({
+            title: '加载中...'
+          })
+        }
         const res = await wx.cloud.callFunction({
           name: 'answerPage',
           data: {
