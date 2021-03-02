@@ -42,7 +42,7 @@ exports.main = async (event, context) => {
     }
   }
 
-  const score =  `${(right / cards.length * 100).toFixed(1)}%`
+  const score =  `${(right / cards.length * 100).toFixed(0)}%`
   
   // 创建时间
   const date = new Date()

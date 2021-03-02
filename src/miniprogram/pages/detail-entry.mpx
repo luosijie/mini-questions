@@ -10,7 +10,7 @@
           {{ detail.createTime }}
         </view>
         <view class="num">
-          {{ detail.answers.length }}人参与
+          {{ detail.answers.length }}次参与
         </view>
       </view>
     </view>

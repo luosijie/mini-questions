@@ -4,13 +4,13 @@
       <!-- 全局配置 -->
       <swiper-item>
         <view class="card config">
-          <input type="text" wx:model="{{ formData.title }}"  placeholder="请输入题卡名称"/>
+          <textarea type="text" maxlength="24" auto-height="true" wx:model="{{ formData.title }}"  placeholder="请输入题卡名称"/>
         </view>
       </swiper-item>
       <swiper-item wx:for="{{ formData.cards }}" wx:key="id" wx:for-item="card">
         <view class="card">
           <!-- 标题 -->
-          <input type="text" class="title" value="{{ card.title }}" placeholder="请输入标题" bindblur="titleChange"/>
+          <input type="text" maxlength="12" class="title" value="{{ card.title }}" placeholder="请输入标题" bindblur="titleChange"/>
           <!-- 选项 -->
           <view
             class="option"
@@ -22,7 +22,7 @@
             <!-- 移除选项 -->
             <i class="remove iconfont icon-remove" bindtap="removeOption(optionIndex)"></i>
             <!-- 选项标题 -->
-            <input type="text" value="{{ option.value }}" placeholder="请输入选项标题" bindblur="optionTitleChange(optionIndex, $event)"/>
+            <input type="text" maxlength="12" value="{{ option.value }}" placeholder="请输入选项标题" bindblur="optionTitleChange(optionIndex, $event)"/>
             <!-- 正确选项 -->
             <view class="correct" bindtap="setCorrect(index, optionIndex)">
               <i class="check iconfont icon-check" wx:if="{{ card.correct === optionIndex }}"></i>
@@ -275,7 +275,7 @@
       justify-content: center;
       align-items: center;
       font-size: 38rpx;
-      input {
+      textarea {
         text-align: center;
       }
     }

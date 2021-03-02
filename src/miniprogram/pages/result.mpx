@@ -2,6 +2,7 @@
   <view class="main" wx:if="{{ detail }}">
     <view class="card">
       <view class="title">“ {{ detail.question.title }} ”</view>
+      <view class="zql">正确率</view>
       <view class="score">{{ detail.score }}</view>
       <view class="from">
         <image src="{{ detail.creator.avatarUrl }}"></image> {{ detail.creator.nickName }} 的成绩单
@@ -10,6 +11,7 @@
         <view
           class="item"
           wx:for="{{ detail.result }}"
+          wx:key="index"
           wx:style="{{ { background: item.right ? '#4faf70' : '#d94948' } }}"
         >
           {{ item.letter }}
@@ -23,29 +25,49 @@
           出题人: {{ detail.questionCreator.nickName }}
         </view>
         <view class="num" wx:if="{{ detail.question.answers }}">
-          {{ detail.question.answers.length }}人参与
+          {{ detail.question.answers.length }}次参与
         </view>
       </view>
     </view>
     <view class="action">
-      <button class="share" open-type="share">分享</button>
+      <view class="share" bindtap="generateShareImage">生成分享图</view>
       <view class="detail" bindtap="toCards" wx:if="{{ user.OPENID === detail.creator.OPENID }}">再试一次</view>
       <view class="detail" bindtap="toDetail" wx:else>我试一下</view>
     </view>
+    <!-- 用来生成分享图 -->
+    <canvas
+      type="2d"
+      id="canvas_share"
+      class="canvas-share"
+      style="width: {{canvasShare.width}}px; height: {{canvasShare.height}}px"
+    />
+    <pop visible="{{ imageShare.visible }}" bindclose="closeImageShare">
+      <image src="{{ imageShare.image }}" mode="aspectFit" class="image-share"></image>
+    </pop>
   </view>
 </template>
 
 <script>
   import { createPage } from '@mpxjs/core'
   import no2letter from '../utils/no2letter'
+  import loadImage from '../utils/loadImage'
   createPage({
     data: {
       user: null,
-      detail: null
+      detail: null,
+      canvasShare: {
+        width: 0,
+        height: 0
+      },
+      imageShare: {
+        visible: false,
+        image: ''
+      }
     },
     onLoad (params) {
+      const id = params._id || params.scene
       this.user = wx.getStorageSync('user')
-      this.getDetail(params._id)
+      this.getDetail(id)
     },
     onShareAppMessage () {
       const title = `我在${this.detail.questionCreator.nickName}的题目中得分${this.detail.score},你也来试试？`
@@ -60,6 +82,141 @@
       }
     },
     methods: {
+      closeImageShare () {
+        console.log('trigger close')
+        this.imageShare.visible = false
+      },
+      // 生成分享图
+      async generateShareImage () {
+        if (this.imageShare.image) {
+          this.imageShare.visible = true
+          wx.saveImageToPhotosAlbum({
+            filePath: this.imageShare.image,
+            success () {
+              wx.showToast({
+                title: '图片已经保存到相册',
+                icon: 'none'
+              })
+            }
+          })
+          return
+        }
+        wx.showLoading({
+          title: '处理中...'
+        })
+        const res = await wx.cloud.callFunction({
+          name: 'wxacode',
+          data: {
+            page: 'pages/result',
+            scene: this.detail._id
+          }
+        })
+        let pageCode
+        if (res.result.errCode === 0) {
+          pageCode = `data:image/png;base64,${wx.arrayBufferToBase64(res.result.buffer)}`
+        } else {
+          return
+        }
+        const query = this.createSelectorQuery()
+        query
+          .select('#canvas_share')
+          .fields({ node: true, size: true })
+          .exec(async res => {
+            console.log('ressss', res)
+            // 获取 canvas 实例
+            const canvas = res[0].node
+            // 获取 canvas 绘图上下文
+            const ctx = canvas.getContext('2d')
+            const width = 700
+            const height = 900
+            canvas.width = width
+            canvas.height = height
+            console.log('ctx', ctx)
+            // 绘制背景
+            ctx.fillStyle = 'white'
+            ctx.fillRect(0, 0, width, height)
+            // 绘制head区域
+            ctx.textBaseline = 'top'
+            ctx.font = '32px sans-serif'
+            ctx.fillStyle = '#000000'
+            ctx.fillText('小题卡', 20, 20)
+            ctx.fillStyle = '#999999'
+            ctx.fillText('成绩单', 585, 20)
+            // 绘制title
+            const title = `“${this.detail.question.title}”`
+            ctx.font = 'normal bold 50px sans-serif'
+            ctx.fillStyle = '#000000'
+            ctx.fillText(title, (width - title.length * 50) / 2 + 25, 150)
+            // 绘制sub-title
+            const subtitle = '我在      的题目中正确率为'
+            ctx.font = '24px sans-serif'
+            ctx.fillStyle = '#999'
+            ctx.fillText(subtitle, (width - subtitle.length * 24) / 2 + 48, 250)
+            // 绘制出题者头像
+            const photoCreator = await loadImage.call(this, this.detail.creator.avatarUrl, 'canvas_share')
+            ctx.drawImage(photoCreator, 270, 250, 24, 24)
+            // 绘制score
+            ctx.font = 'normal bold 200px sans-serif'
+            ctx.fillStyle = '#70B7FC'
+            ctx.fillText(this.detail.score, (width - this.detail.score.length * 100) / 2 - 80, 350)
+            // 绘制welcome
+            const welcome = '你也来试试吧'
+            ctx.font = '24px sans-serif'
+            ctx.fillStyle = '#999'
+            ctx.fillText(welcome, (width - welcome.length * 24) / 2, 620)
+            // 绘制创建人头像
+            const photoAnswer = await loadImage.call(this, this.detail.questionCreator.avatarUrl, 'canvas_share')
+            ctx.drawImage(photoAnswer, 40, 780, 24, 24)
+            // 绘制foot-title
+            const footTitle = '邀请你一起来答题'
+            ctx.font = '24px sans-serif'
+            ctx.fillStyle = '#999'
+            ctx.fillText(footTitle, 70, 780)
+            // 绘制foot-title
+            const footSubTitle = '长按图片识别进入小程序'
+            ctx.font = '24px sans-serif'
+            ctx.fillStyle = '#999'
+            ctx.fillText(footSubTitle, 40, 820)
+            // 绘制小程序码
+            const photoPage = await loadImage.call(this, pageCode, 'canvas_share')
+            ctx.drawImage(photoPage, 510, 730, 150, 150)
+            // 绘制边框和分割线
+            ctx.strokeStyle = '#eee'
+            ctx.lineWidth = 6
+            ctx.strokeRect(0, 0, width, height)
+            ctx.lineWidth = 3
+            ctx.beginPath()
+            ctx.moveTo(0, 700)
+            ctx.lineTo(700, 700)
+            ctx.stroke()
+            ctx.save()
+            wx.hideLoading()
+            // 生成图片预览
+            wx.canvasToTempFilePath({
+              canvas,
+              x: 0,
+              y: 0,
+              width,
+              height,
+              complete: resTemp => {
+                console.log('resTemp', canvas, resTemp)
+                if (resTemp.errMsg === 'canvasToTempFilePath:ok') {
+                  this.imageShare.image = resTemp.tempFilePath
+                  this.imageShare.visible = true
+                  wx.saveImageToPhotosAlbum({
+                    filePath: resTemp.tempFilePath,
+                    success () {
+                      wx.showToast({
+                        title: '图片已经保存到相册',
+                        icon: 'none'
+                      })
+                    }
+                  })
+                }
+              }
+            })
+          })
+      },
       async getDetail (_id) {
         wx.showLoading({
           title: '加载中...'
@@ -70,7 +227,6 @@
             _id
           }
         })
-        console.log('answerDetial:', res)
         this.detail = res.result.data
         this.detail.result = this.detail.result.map((e, index) => {
           return {
@@ -98,14 +254,17 @@
   {
     "navigationBarTitleText": "成绩单",
     "navigationBarBackgroundColor": "#40A9FF",
-    "enablePullDownRefresh": true,
-    "usingComponents": {}
+    "usingComponents": {
+      "pop": "../components/pop"
+    }
   }
 </script>
 <style lang="less" scoped>
 .main {
-  padding: 20rpx;
   height: 100vh;
+  width: 100vw;
+  padding: 20rpx;
+  overflow: hidden;
   .card {
     border: 2rpx solid #eee;
     padding: 60rpx;
@@ -120,6 +279,12 @@
       font-size: 46rpx;
       font-weight: bold;
       color: #666;
+    }
+
+    .zql {
+      color: #ccc;
+      margin-top: 10rpx;
+      font-size: 24rpx;
     }
     .score {
       font-size: 160rpx;
@@ -193,6 +358,16 @@
     .detail {
       background: #40A9FF;
     }
+  }
+  .canvas-share {
+    position: absolute;
+    top: 0rpx;
+    left: 0rpx;
+    opacity: 0;
+  }
+
+  .image-share {
+    height: 700rpx;
   }
 }
 </style>

@@ -11,6 +11,7 @@
     >
       登录
     </button>
+    <view class="tip">点击登录将获取个人头像，昵称等信息用于个人资料的展示</view>
   </view>
 </template>
 
@@ -91,7 +92,13 @@
     font-weight: bold;
     text-align: center;
     line-height: 80rpx;
-    margin: 300rpx 0 100rpx;
+    margin: 300rpx 0 50rpx;
+  }
+  .tip {
+    width: 400rpx;
+    color: #aaa;
+    text-align: center;
+    font-size: 26rpx;
   }
 }
 </style>
