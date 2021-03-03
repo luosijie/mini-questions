@@ -111,6 +111,12 @@
                 title: '图片已经保存到相册',
                 icon: 'none'
               })
+            },
+            fail () {
+              wx.showToast({
+                title: '请先在设置里打开相册权限',
+                icon: 'none'
+              })
             }
           })
           return
@@ -220,6 +226,12 @@
                         title: '图片已经保存到相册',
                         icon: 'none'
                       })
+                    },
+                    fail () {
+                      wx.showToast({
+                        title: '请先在设置里打开相册权限',
+                        icon: 'none'
+                      })
                     }
                   })
                 }
@@ -240,7 +252,6 @@
   {
     "navigationBarTitleText": "详情",
     "navigationBarBackgroundColor": "#40A9FF",
-    "enablePullDownRefresh": true,
     "usingComponents": {
       "pop": "../components/pop"
     }
@@ -250,6 +261,8 @@
 .main {
   padding: 20rpx;
   height: 100vh;
+  position: relative;
+  overflow: hidden;
   .card {
     border: 2rpx solid #eee;
     padding: 60rpx;

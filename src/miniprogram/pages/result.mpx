@@ -97,6 +97,12 @@
                 title: '图片已经保存到相册',
                 icon: 'none'
               })
+            },
+            fail () {
+              wx.showToast({
+                title: '请先在设置里打开相册权限',
+                icon: 'none'
+              })
             }
           })
           return
@@ -211,6 +217,12 @@
                         title: '图片已经保存到相册',
                         icon: 'none'
                       })
+                    },
+                    fail () {
+                      wx.showToast({
+                        title: '请先在设置里打开相册权限',
+                        icon: 'none'
+                      })
                     }
                   })
                 }
@@ -266,6 +278,7 @@
   width: 100vw;
   padding: 20rpx;
   overflow: hidden;
+  position: relative;
   .card {
     border: 2rpx solid #eee;
     padding: 60rpx;
