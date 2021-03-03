@@ -15,25 +15,45 @@
       </view>
     </view>
     <view class="action">
-      <button class="share" open-type="share">邀请回答</button>
+      <view class="share" bindtap="generateShareImage" wx:if="{{ isOwner }}">生成分享图</view>
+      <button class="share" open-type="share" wx:else>邀请回答</button>
       <!-- <view class="detail" bindtap="toCards" wx:if="{{ isOwner === true }}">查看详情</view> -->
       <view class="detail" bindtap="toCards">开始答题</view>
     </view>
+    <pop visible="{{ imageShare.visible }}" bindclose="closeImageShare">
+      <image src="{{ imageShare.image }}" mode="aspectFit" class="image-share"></image>
+    </pop>
+    <!-- 用来生成分享图 -->
+    <canvas
+      type="2d"
+      id="canvas_share"
+      class="canvas-share"
+      style="width: {{canvasShare.width}}px; height: {{canvasShare.height}}px"
+    />
   </view>
 </template>
 
 <script>
   import { createPage } from '@mpxjs/core'
+  import loadImage from '../utils/loadImage'
   createPage({
     data: {
       detail: null,
       user: null,
-      isOwner: null
+      isOwner: null,
+      canvasShare: {
+        width: 0,
+        height: 0
+      },
+      imageShare: {
+        visible: false,
+        image: ''
+      }
     },
     onLoad (params) {
-      console.log('sss')
+      const id = params._id || params.scene
       this.user = wx.getStorageSync('user')
-      this.getDetail(params._id)
+      this.getDetail(id)
     },
     onPullDownRefresh () {
       console.log('下拉刷新')
@@ -41,7 +61,6 @@
       this.getList()
     },
     onReachBottom () {
-      console.log('上拉触底')
       if (this.total > this.list.length) {
         this.no++
         this.getList()
@@ -59,6 +78,9 @@
       }
     },
     methods: {
+      closeImageShare () {
+        this.imageShare.visible = false
+      },
       async getDetail (_id) {
         wx.showLoading({
           title: '加载中',
@@ -78,6 +100,133 @@
         })
         wx.hideLoading()
       },
+      // 生成分享图
+      async generateShareImage () {
+        if (this.imageShare.image) {
+          this.imageShare.visible = true
+          wx.saveImageToPhotosAlbum({
+            filePath: this.imageShare.image,
+            success () {
+              wx.showToast({
+                title: '图片已经保存到相册',
+                icon: 'none'
+              })
+            }
+          })
+          return
+        }
+        wx.showLoading({
+          title: '处理中...'
+        })
+        const res = await wx.cloud.callFunction({
+          name: 'wxacode',
+          data: {
+            page: 'pages/detail-entry',
+            scene: this.detail._id
+          }
+        })
+        let pageCode
+        if (res.result.errCode === 0) {
+          pageCode = `data:image/png;base64,${wx.arrayBufferToBase64(res.result.buffer)}`
+        } else {
+          return
+        }
+        const query = this.createSelectorQuery()
+        query
+          .select('#canvas_share')
+          .fields({ node: true, size: true })
+          .exec(async res => {
+            console.log('ressss', res)
+            // 获取 canvas 实例
+            const canvas = res[0].node
+            // 获取 canvas 绘图上下文
+            const ctx = canvas.getContext('2d')
+            const width = 700
+            const height = 900
+            this.canvasShare.width = 700
+            this.canvasShare.height = 900
+            canvas.width = width
+            canvas.height = height
+            console.log('ctx', ctx)
+            // 绘制背景
+            ctx.fillStyle = 'white'
+            ctx.fillRect(0, 0, width, height)
+            // 绘制head区域
+            ctx.textBaseline = 'top'
+            ctx.font = '32px sans-serif'
+            ctx.fillStyle = '#000000'
+            ctx.fillText('小题卡', 20, 20)
+            ctx.fillStyle = '#999999'
+            ctx.fillText('请你来答题', 520, 20)
+            // 绘制sub-title
+            const subtitle = '我新出了一道题'
+            ctx.font = '24px sans-serif'
+            ctx.fillStyle = '#999'
+            ctx.fillText(subtitle, (width - subtitle.length * 24) / 2, 220)
+            // 绘制title
+            const title = `“${this.detail.title}”`
+            ctx.font = 'normal bold 50px sans-serif'
+            ctx.fillStyle = '#000000'
+            ctx.fillText(title, (width - title.length * 50) / 2 + 25, 350)
+            // 绘制welcome
+            const welcome = '来看看你能得多少分'
+            ctx.font = '24px sans-serif'
+            ctx.fillStyle = '#999'
+            ctx.fillText(welcome, (width - welcome.length * 24) / 2, 500)
+            // 绘制创建人头像
+            const photoAnswer = await loadImage.call(this, this.detail.creator.avatarUrl, 'canvas_share')
+            ctx.drawImage(photoAnswer, 40, 780, 24, 24)
+            // 绘制foot-title
+            const footTitle = '邀请你一起来答题'
+            ctx.font = '24px sans-serif'
+            ctx.fillStyle = '#999'
+            ctx.fillText(footTitle, 70, 780)
+            // 绘制foot-title
+            const footSubTitle = '长按图片识别进入小程序'
+            ctx.font = '24px sans-serif'
+            ctx.fillStyle = '#999'
+            ctx.fillText(footSubTitle, 40, 820)
+            // 绘制小程序码
+            const photoPage = await loadImage.call(this, pageCode, 'canvas_share')
+            ctx.drawImage(photoPage, 510, 730, 150, 150)
+            // 绘制边框和分割线
+            ctx.strokeStyle = '#eee'
+            ctx.lineWidth = 8
+            ctx.strokeRect(0, 0, width, height)
+            ctx.lineWidth = 3
+            ctx.beginPath()
+            ctx.moveTo(0, 700)
+            ctx.lineTo(700, 700)
+            ctx.stroke()
+            ctx.save()
+            wx.hideLoading()
+            // 生成图片预览
+            wx.canvasToTempFilePath({
+              x: 0,
+              y: 0,
+              width,
+              height,
+              canvas,
+              complete: resTemp => {
+                console.log('resTemp', canvas, resTemp)
+                if (resTemp.errMsg === 'canvasToTempFilePath:ok') {
+                  this.imageShare.image = resTemp.tempFilePath
+                  this.imageShare.visible = true
+                  console.log('resTemp.temp-file-path', resTemp.tempFilePath)
+                  wx.saveImageToPhotosAlbum({
+                    filePath: resTemp.tempFilePath,
+                    success () {
+                      wx.showToast({
+                        title: '图片已经保存到相册',
+                        icon: 'none'
+                      })
+                    }
+                  })
+                }
+              }
+            })
+          })
+      },
       toCards () {
         wx.navigateTo({
           url: `detail-cards?_id=${this.detail._id}`
@@ -92,7 +241,9 @@
     "navigationBarTitleText": "详情",
     "navigationBarBackgroundColor": "#40A9FF",
     "enablePullDownRefresh": true,
-    "usingComponents": {}
+    "usingComponents": {
+      "pop": "../components/pop"
+    }
   }
 </script>
 <style lang="less" scoped>
@@ -162,6 +313,15 @@
     .detail {
       background: #40A9FF;
     }
+  }
+  .canvas-share {
+    position: absolute;
+    top: 0rpx;
+    left: 10000rpx;
+  }
+  
+  .image-share {
+    height: 700rpx;
   }
 }
 </style>

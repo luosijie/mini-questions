@@ -129,9 +129,10 @@
             const ctx = canvas.getContext('2d')
             const width = 700
             const height = 900
+            this.canvasShare.width = 700
+            this.canvasShare.height = 900
             canvas.width = width
             canvas.height = height
-            console.log('ctx', ctx)
             // 绘制背景
             ctx.fillStyle = 'white'
             ctx.fillRect(0, 0, width, height)
@@ -153,8 +154,8 @@
             ctx.fillStyle = '#999'
             ctx.fillText(subtitle, (width - subtitle.length * 24) / 2 + 48, 250)
             // 绘制出题者头像
-            const photoCreator = await loadImage.call(this, this.detail.creator.avatarUrl, 'canvas_share')
-            ctx.drawImage(photoCreator, 270, 250, 24, 24)
+            const photoCreator = await loadImage.call(this, this.detail.questionCreator.avatarUrl, 'canvas_share')
+            ctx.drawImage(photoCreator, 263, 250, 24, 24)
             // 绘制score
             ctx.font = 'normal bold 200px sans-serif'
             ctx.fillStyle = '#70B7FC'
@@ -165,7 +166,7 @@
             ctx.fillStyle = '#999'
             ctx.fillText(welcome, (width - welcome.length * 24) / 2, 620)
             // 绘制创建人头像
-            const photoAnswer = await loadImage.call(this, this.detail.questionCreator.avatarUrl, 'canvas_share')
+            const photoAnswer = await loadImage.call(this, this.detail.creator.avatarUrl, 'canvas_share')
             ctx.drawImage(photoAnswer, 40, 780, 24, 24)
             // 绘制foot-title
             const footTitle = '邀请你一起来答题'
@@ -182,7 +183,7 @@
             ctx.drawImage(photoPage, 510, 730, 150, 150)
             // 绘制边框和分割线
             ctx.strokeStyle = '#eee'
-            ctx.lineWidth = 6
+            ctx.lineWidth = 8
             ctx.strokeRect(0, 0, width, height)
             ctx.lineWidth = 3
             ctx.beginPath()
@@ -193,11 +194,11 @@
             wx.hideLoading()
             // 生成图片预览
             wx.canvasToTempFilePath({
-              canvas,
               x: 0,
               y: 0,
               width,
               height,
+              canvas,
               complete: resTemp => {
                 console.log('resTemp', canvas, resTemp)
                 if (resTemp.errMsg === 'canvasToTempFilePath:ok') {
@@ -362,8 +363,7 @@
   .canvas-share {
     position: absolute;
     top: 0rpx;
-    left: 0rpx;
-    opacity: 0;
+    left: 10000rpx;
   }
 
   .image-share {
