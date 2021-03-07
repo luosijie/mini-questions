@@ -4,6 +4,7 @@
  * @param {String} answer 答案
  */
 const cloud = require('wx-server-sdk')
+
 cloud.init({
   env: cloud.DYNAMIC_CURRENT_ENV
 })
@@ -54,7 +55,7 @@ exports.main = async (event, context) => {
   const seconds = date.getSeconds()
 
   const data = {
-    createTime: `${year}-${month}-${day} ${hour}:${minutes}:${seconds}`,
+    createTime: `${year}-${month}-${day} ${hour + 8}:${minutes}:${seconds}`,
     creator: wxContext.OPENID,
     questionId,
     questionCreator,

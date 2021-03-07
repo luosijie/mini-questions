@@ -30,7 +30,7 @@ exports.main = async (event, context) => {
   const seconds = date.getSeconds()
 
   const data = {
-    createTime: `${year}-${month}-${day} ${hour}:${minutes}:${seconds}`,
+    createTime: `${year}-${month}-${day} ${hour + 8}:${minutes}:${seconds}`,
     creator: wxContext.OPENID, // 出题人
     title: event.title, // 标题
     cards: event.cards, // 选项

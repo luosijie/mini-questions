@@ -35,7 +35,6 @@ exports.main = async (event, context) => {
     as: 'question'
   })
   .sort({
-    readed: 1,
     _id: -1
   })
   .skip((no - 1) * size)
