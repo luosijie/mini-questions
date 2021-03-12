@@ -7,7 +7,7 @@
       <view class="from">
         <image src="{{ detail.creator.avatarUrl }}"></image> {{ detail.creator.nickName }} 的成绩单
       </view>
-      <view class="result">
+      <view class="result" wx:if="{{ showResult }}">
         <view
           class="item"
           wx:for="{{ detail.result }}"
@@ -16,6 +16,9 @@
         >
           {{ item.letter }}
         </view>
+      </view>
+      <view class="me-too" wx:else bindtap="toCreate">
+        我也来出一题
       </view>
       <view class="info">
         <view class="date">
@@ -62,7 +65,8 @@
       imageShare: {
         visible: false,
         image: ''
-      }
+      },
+      showResult: false
     },
     onLoad (params) {
       const id = params._id || params.scene
@@ -75,15 +79,8 @@
         title
       }
     },
-    computed: {
-      isOwner () {
-        console.log('this.user', this.user)
-        return this.user
-      }
-    },
     methods: {
       closeImageShare () {
-        console.log('trigger close')
         this.imageShare.visible = false
       },
       // 生成分享图
@@ -247,11 +244,18 @@
             right: e
           }
         })
+        const OPENID = this.user.OPENID
+        this.showResult = OPENID === this.detail.creator.OPENID || OPENID === this.detail.questionCreator.OPENID
         wx.hideLoading()
       },
       toCards () {
         wx.navigateTo({
           url: `detail-cards?_id=${this.detail.question._id}`
+        })
+      },
+      toCreate () {
+        wx.navigateTo({
+          url: 'new'
         })
       },
       toDetail () {
@@ -339,6 +343,11 @@
           margin-right: 10rpx;
         }
       }
+    }
+    .me-too {
+      color: #999;
+      margin-top: 80rpx;
+      font-size: 28rpx;
     }
     .info {
       position: absolute;
