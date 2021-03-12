@@ -265,7 +265,7 @@
   overflow: hidden;
   .card {
     border: 2rpx solid #eee;
-    padding: 60rpx;
+    padding: 30rpx;
     border-radius: 20rpx;
     height: calc(100% - 200rpx);
     display: flex;
@@ -276,6 +276,7 @@
     .title {
       font-size: 46rpx;
       font-weight: bold;
+      text-align: center;
       color: #666;
     }
     .from {

@@ -8,8 +8,8 @@
   createApp({
     onLaunch () {
       wx.cloud.init({
-        // env: 'dev-5g1emudhfc5b16b4'
-        env: 'pro-9g5s46d9306ab62f'
+        env: 'dev-5g1emudhfc5b16b4'
+        // env: 'pro-9g5s46d9306ab62f'
       })
       console.log('app onload')
       checkLogin()

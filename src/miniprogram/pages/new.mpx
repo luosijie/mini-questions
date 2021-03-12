@@ -4,7 +4,7 @@
       <!-- 全局配置 -->
       <swiper-item>
         <view class="card config">
-          <textarea type="text" maxlength="24" auto-height="true" wx:model="{{ formData.title }}"  placeholder="请输入题卡名称"/>
+          <textarea type="text" maxlength="12" auto-height="true" wx:model="{{ formData.title }}"  placeholder="请输入题卡名称"/>
         </view>
       </swiper-item>
       <swiper-item wx:for="{{ formData.cards }}" wx:key="id" wx:for-item="card">
