@@ -92,7 +92,7 @@
           value: ''
         }
       },
-      // 生成题目
+      // 生成一个起始题目
       generateCard () {
         const id = new Date().getTime()
         const card = {
@@ -223,7 +223,6 @@
           name: 'questionAdd',
           data: this.formData
         })
-        console.log('新增题目成功', res)
         if (res.result.success) {
           wx.showToast({
             title: '创建成功',

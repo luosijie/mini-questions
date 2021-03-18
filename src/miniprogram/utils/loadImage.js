@@ -1,6 +1,7 @@
 
 /**
- * 图片要放在 image 里才可以被 canvas 渲染
+ * 将图片路径转化为 image 元素
+ * 用来将图片渲染到canvas中
  * @param { String } src 本地文件路径
  * @param { Object } canvas canvas实例
  * @return { Promise } promise返回 image 实例

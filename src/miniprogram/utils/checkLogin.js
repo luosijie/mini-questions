@@ -1,4 +1,7 @@
-// 校验用户是否登录过
+/**
+ * 校验用户是否登录过
+ * 没有登录过跳转到 登录页面
+ * */
 export default function () {
   const user = wx.getStorageSync('user')
   console.log('current-user', user)
